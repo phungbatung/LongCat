@@ -28,7 +28,7 @@ public class AssetsManager : MonoBehaviour
         return default;
     }
 
-    public GameObject GetBlockByType(BlockType type)
+    public GameObject GetBlockByType(CellType type)
     {
         return GetBlockByKey(type.ToString());
     }

@@ -26,9 +26,9 @@ public class LevelHandler
         {
             for (int column = 0; column < height; column++)
             {
-                var cell = new Cell(row, column, column + offSetX, offSetY - row, (BlockType)mapData[row, column]);
+                var cell = new Cell(row, column, column + offSetX, offSetY - row, (CellType)mapData[row, column]);
                 Map[row, column] = cell;
-                if(cell.BlockType == BlockType.Head)
+                if(cell.BlockType == CellType.Head)
                 {
                     Head = cell;
                 }
@@ -44,7 +44,7 @@ public class LevelHandler
         {
             //Debug.Log($"Head: (({Head.X}, {Head.Y})");
             //Debug.Log($"Next cell: (({nextCell.X}, {nextCell.Y}), BlockType: {nextCell.BlockType}");
-            if(nextCell.BlockType == BlockType.Empty)
+            if(nextCell.BlockType == CellType.Empty)
                 return true;
         }
         return false;
@@ -63,11 +63,11 @@ public class LevelHandler
             Debug.LogError($"Check CanMove(direction) is true, but cannot find the next cell at direction: {direction}");
             return null;
         }
-        while (nextCell.BlockType == BlockType.Empty)
+        while (nextCell.BlockType == CellType.Empty)
         {
-            Head.BlockType = BlockType.Body;
+            Head.BlockType = CellType.Body;
             Head = nextCell;
-            Head.BlockType = BlockType.Head;
+            Head.BlockType = CellType.Head;
 
             if(GetNextCellAtDirection(Head, direction, out _nextCell))
             {
@@ -123,7 +123,7 @@ public class LevelHandler
         {
             for (int column = 0; column < height; column++)
             {
-                if (Map[row, column].BlockType == BlockType.Empty)
+                if (Map[row, column].BlockType == CellType.Empty)
                 {
                     Debug.Log($"Check win fail on position: ({row}, {column}");
                     return false;
@@ -136,13 +136,13 @@ public class LevelHandler
 
     public bool CheckLoseCondition()
     {
-        if (Head.X > 0 && Map[Head.X - 1, Head.Y].BlockType == BlockType.Empty) //neu ben trai la empty thi chua thua
+        if (Head.X > 0 && Map[Head.X - 1, Head.Y].BlockType == CellType.Empty) //neu ben trai la empty thi chua thua
             return false;
-        if (Head.X < Map.GetLength(0) && Map[Head.X + 1, Head.Y].BlockType == BlockType.Empty) // phai
+        if (Head.X < Map.GetLength(0) && Map[Head.X + 1, Head.Y].BlockType == CellType.Empty) // phai
             return false;
-        if (Head.Y > 0 && Map[Head.X, Head.Y - 1].BlockType == BlockType.Empty) //duoi
+        if (Head.Y > 0 && Map[Head.X, Head.Y - 1].BlockType == CellType.Empty) //duoi
             return false;
-        if (Head.Y < Map.GetLength(1) && Map[Head.X, Head.Y + 1].BlockType == BlockType.Empty) //tren
+        if (Head.Y < Map.GetLength(1) && Map[Head.X, Head.Y + 1].BlockType == CellType.Empty) //tren
             return false;
         Debug.Log("Lose");
         return true; // neu ca 4 huong deu khong co empty thi thua

@@ -8,9 +8,9 @@ public class Cell
     public int Y;
     public float HorPos;
     public float VerPos;
-    public BlockType BlockType;
+    public CellType BlockType;
 
-    public Cell(int x, int y,float horPos, float verPos, BlockType blockType)
+    public Cell(int x, int y,float horPos, float verPos, CellType blockType)
     {
         X = x;
         Y = y;

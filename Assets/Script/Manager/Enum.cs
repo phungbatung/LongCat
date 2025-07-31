@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public enum BlockType
+public enum CellType
 {
     Empty=0,
     Head=1,
