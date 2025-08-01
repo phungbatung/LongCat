@@ -42,6 +42,7 @@ public class GameManager : MonoBehaviour
 
     public Transform Container;
     public CameraController camera;
+    public ParticleSystem particalEffect;
     private Transform Head;
     public int CurrentLevel { get; set; }
     [SerializeField] private int MoveSpeed;
@@ -178,6 +179,28 @@ public class GameManager : MonoBehaviour
                 if (Mathf.Abs(Vector3.Distance(endPoint, targetPoint)) < 0.01f)
                 {
                     camera.Shake(direction);
+                    particalEffect.transform.parent.position = Head.transform.position;
+                    switch (direction)
+                    {
+                        case Direction.Left:
+                            particalEffect.transform.parent.forward = Vector3.left;
+                            break;
+                        case Direction.Right:
+                            particalEffect.transform.parent.forward = Vector3.right;
+                            break;
+                        case Direction.Up:
+                            particalEffect.transform.parent.forward = Vector3.forward;
+                            break;
+                        case Direction.Down:
+                            particalEffect.transform.parent.forward = Vector3.back;
+                            break;
+                        case Direction.None:
+                        default:
+                            break;
+                    }
+
+                    particalEffect.Play();
+
                     if (levelHandler.CheckWinCondition())
                     {
                         SetState(GameState.Win);
