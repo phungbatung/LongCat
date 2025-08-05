@@ -4,7 +4,10 @@ using UnityEngine;
 public class CameraController : MonoBehaviour
 {
     public float offset;
-
+    private void Awake()
+    {
+        
+    }
     public void Shake(Direction direction)
     {
         Vector3 dir;
@@ -28,6 +31,6 @@ public class CameraController : MonoBehaviour
         }
 
         Vector3 shakePosition = transform.position + offset*dir;
-        transform.DOMove(shakePosition, 0.01f).SetLoops(4, LoopType.Yoyo);
+        transform.DOMove(shakePosition, 0.005f).SetLoops(4, LoopType.Yoyo);
     }    
 }

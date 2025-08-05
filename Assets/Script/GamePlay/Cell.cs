@@ -23,4 +23,9 @@ public class Cell
     {
         return new Vector3(HorPos, 0.5f, VerPos);
     }    
+
+    public Cell Clone()
+    {
+        return new Cell(X, Y, HorPos, VerPos, BlockType);
+    }
 }

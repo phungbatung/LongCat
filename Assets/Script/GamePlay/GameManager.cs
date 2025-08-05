@@ -3,6 +3,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -11,36 +12,6 @@ using UnityEngine.UI;
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance { get; private set; }
-
-    List<int[,]> mapList = new List<int[,]>
-    {
-        new int[,]
-        {
-            { 3, 3, 3, 3, 3 },
-            { 3, 0, 0, 0, 3 },
-            { 3, 0, 1, 0, 3 },
-            { 3, 0, 0, 0, 3 },
-            { 3, 3, 3, 3, 3 }
-        },
-        new int[,]
-        {
-            { 3, 3, 3, 3, 3, 3 },
-            { 3, 0, 0, 0, 3, 3 },
-            { 3, 0, 0, 0, 0, 3 },
-            { 3, 3, 0, 1, 0, 3 },
-            { 3, 3, 0, 0, 0, 3 },
-            { 3, 3, 3, 3, 3, 3 }
-        },
-        new int[,]
-        {
-            { 3, 3, 3, 3, 3, 3 },
-            { 3, 0, 0, 0, 0, 3 },
-            { 3, 0, 0, 1, 0, 3 },
-            { 3, 0, 3, 3, 0, 3 },
-            { 3, 0, 0, 0, 0, 3 },
-            { 3, 3, 3, 3, 3, 3 }
-        }
-    };
 
 
     public Transform Container;
@@ -59,8 +30,13 @@ public class GameManager : MonoBehaviour
     private GameState _gameState;
     private Direction _lastMoveDirection;
 
+
+
+    private bool autoPlay;
     public Action OnWin { get; set; }
     public Action OnLose { get; set; }
+
+
     private void Awake()
     {
         if (Instance == null)
@@ -112,7 +88,7 @@ public class GameManager : MonoBehaviour
         _gameState = GameState.WaitingForInput;
         editor.GetChild(0).GetComponent<Button>()?.onClick.AddListener(BackToEditor);
         editor.GetChild(1).GetComponent<Button>()?.onClick.AddListener(AutoPlay);
-
+        _gameState = GameState.WaitingForInput;
     }
 
     public void BackToEditor()
@@ -121,12 +97,37 @@ public class GameManager : MonoBehaviour
     }
     public void AutoPlay()
     {
-
+        var findPath = new FPManager(levelHandler);
+        List<Direction> directions = findPath.CalculateFinalPath();
+        Debug.Log($"Move count to win: {directions.Count}!!!");
+        StartCoroutine(CoAutoPlay(directions));
     }
 
+    private IEnumerator CoAutoPlay(List<Direction> directions)
+    {
+        while (directions.Count > 0)
+        {
+            Debug.Log("loop");
+            if (GetState() == GameState.WaitingForInput)
+            {
+                Debug.Log("Move next direction!!!");
+                yield return new WaitForSeconds(.3f);
+                TryMove(directions[directions.Count - 1]);
+                directions.RemoveAt(directions.Count - 1);
+                yield return new WaitUntil(() => GetState() == GameState.WaitingForInput);
+                yield return new WaitForSeconds(0.15f);
+            }
+            else
+            {
+                yield return null;
+            }
+        }
+    }    
 
     private void Update()
     {
+        if (autoPlay)
+            return;
         switch (_gameState)
         {
             case GameState.WaitingForInput:
@@ -163,14 +164,14 @@ public class GameManager : MonoBehaviour
         Debug.Log($"Try move on direction: {direction}");
         if (levelHandler.CanMove(direction))
         {
-
-            _gameState = GameState.PlayingAnimation;
             StartCoroutine(PlayCatMoveAnimation(direction, levelHandler.MoveInDirection(direction).GetPosition()));
         }
     }
     public IEnumerator PlayCatMoveAnimation(Direction direction, Vector3 endPoint)
     {
         Debug.Log($"Move on direction: {direction}, target: {endPoint}");
+
+        SetState(GameState.PlayingAnimation);
         Vector3 targetPoint = Head.transform.position;
 
         if (_lastMoveDirection != Direction.None)
@@ -215,9 +216,9 @@ public class GameManager : MonoBehaviour
                || direction == Direction.Up && Head.transform.position.z >= targetPoint.z)
             {
 
-                if (Mathf.Abs(Vector3.Distance(endPoint, targetPoint)) < 0.01f)
+                if (Mathf.Abs(Vector3.Distance(endPoint, targetPoint)) < 0.01f) // Complete move
                 {
-                    cam.Shake(direction);
+                    //cam.Shake(direction);
                     particalEffect.transform.parent.position = Head.transform.position;
                     switch (direction)
                     {
