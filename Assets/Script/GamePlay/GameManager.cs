@@ -1,9 +1,12 @@
 ﻿using DG.Tweening;
+using Newtonsoft.Json;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
@@ -41,12 +44,17 @@ public class GameManager : MonoBehaviour
 
 
     public Transform Container;
-    public CameraController camera;
+    public CameraController cam;
     public ParticleSystem particalEffect;
+    [SerializeField] private Transform editor;
+
+    private int[,] currentData;
     private Transform Head;
-    public int CurrentLevel { get; set; }
+
     [SerializeField] private int MoveSpeed;
     private LevelHandler levelHandler;
+
+    [SerializeField] private int CurrentLevel;
 
     private GameState _gameState;
     private Direction _lastMoveDirection;
@@ -63,7 +71,12 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
-        LoadLevel(0);
+        //LoadLevel(0);
+        int[,] data = TempDataHandler.Get<int[,]>("CurrentLevelData");
+        if (data != null)
+            LoadLevelEditor(data);
+        else
+            LoadLevel(CurrentLevel);
     }
 
     public void ReloadLevel()
@@ -79,10 +92,36 @@ public class GameManager : MonoBehaviour
     public void LoadLevel(int level)
     {
         CurrentLevel = level;
-        levelHandler = new(mapList[level]);
+        Debug.Log($"level{CurrentLevel}");
+        string jsonData = Resources.Load<TextAsset>($"level{CurrentLevel}").text;
+        Debug.Log("Data: " + jsonData);
+        currentData = JsonConvert.DeserializeObject<int[,]>(jsonData);
+        levelHandler = new(currentData);
         _lastMoveDirection = Direction.None;
         GenerateMap(levelHandler.Map);
         _gameState = GameState.WaitingForInput;
+    }
+
+    public void LoadLevelEditor(int[,] data)
+    {
+        currentData = data;
+        levelHandler = new(currentData);
+        editor.gameObject.SetActive(true);
+        _lastMoveDirection = Direction.None;
+        GenerateMap(levelHandler.Map);
+        _gameState = GameState.WaitingForInput;
+        editor.GetChild(0).GetComponent<Button>()?.onClick.AddListener(BackToEditor);
+        editor.GetChild(1).GetComponent<Button>()?.onClick.AddListener(AutoPlay);
+
+    }
+
+    public void BackToEditor()
+    {
+        SceneManager.LoadScene("LevelEditor");
+    }
+    public void AutoPlay()
+    {
+
     }
 
 
@@ -178,7 +217,7 @@ public class GameManager : MonoBehaviour
 
                 if (Mathf.Abs(Vector3.Distance(endPoint, targetPoint)) < 0.01f)
                 {
-                    camera.Shake(direction);
+                    cam.Shake(direction);
                     particalEffect.transform.parent.position = Head.transform.position;
                     switch (direction)
                     {

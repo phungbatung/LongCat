@@ -8,6 +8,7 @@ public class AssetsManager : MonoBehaviour
     public static AssetsManager Instance { get; private set; }
 
     [SerializeField] private List<BlockData> blockData;
+    [SerializeField] private List<ColorData> colorData;
 
     private void Awake()
     {
@@ -33,11 +34,29 @@ public class AssetsManager : MonoBehaviour
         return GetBlockByKey(type.ToString());
     }
 
+    public Color GetColorByKey(string key)
+    {
+        for (int i = 0; i < colorData.Count; i++)
+        {
+            if (colorData[i].key == key)
+                return colorData[i].color;
+        }
+        Debug.LogError($"Color with key '{key}' not found!!!!");
+        return default;
+    }
+
     [Serializable]    
     public class BlockData
     {
         public string key;
         public GameObject prefab;
+    }
+    
+    [Serializable]    
+    public class ColorData
+    {
+        public string key;
+        public Color color;
     }
 
     
