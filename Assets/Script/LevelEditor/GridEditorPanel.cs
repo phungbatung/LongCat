@@ -1,7 +1,4 @@
-using JetBrains.Annotations;
-using Mono.Cecil.Cil;
 using UnityEngine;
-using static UnityEngine.Rendering.DebugUI.Table;
 
 public class GridEditorPanel : MonoBehaviour
 {
@@ -15,7 +12,7 @@ public class GridEditorPanel : MonoBehaviour
     private void Start()
     {
         int[,] data = TempDataHandler.Get<int[,]>("CurrentLevelData");
-        if(data!=null)
+        if (data != null)
             LoadLevelData(data);
 
     }
@@ -68,17 +65,17 @@ public class GridEditorPanel : MonoBehaviour
                 gridTiles[i, j].SetValue(i, j, cellType, tileSelectorPanel);
             }
         }
-        
+
     }
 
     public int[,] GetLevelData()
     {
         int[,] data = new int[gridTiles.GetLength(0), gridTiles.GetLength(1)];
-        for(int i = 0; i < gridTiles.GetLength(0); i++)
+        for (int i = 0; i < gridTiles.GetLength(0); i++)
         {
-            for (int j=0; j< gridTiles.GetLength(1); j++)
+            for (int j = 0; j < gridTiles.GetLength(1); j++)
             {
-                data[i,j] = (int)gridTiles[i,j].Type;
+                data[i, j] = (int)gridTiles[i, j].Type;
             }
         }
         return data;
@@ -91,10 +88,10 @@ public class GridEditorPanel : MonoBehaviour
         {
             for (int j = 0; j < data.GetLength(1); j++)
             {
-                
+
                 gridTiles[i, j].SetCellType((CellType)data[i, j]);
             }
         }
     }
-    
+
 }

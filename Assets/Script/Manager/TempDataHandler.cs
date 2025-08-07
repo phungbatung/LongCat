@@ -21,7 +21,7 @@ public static class TempDataHandler
     {
         if (_objDict.TryGetValue(key, out var value)) return value as T;
 
-        Debug.LogError($"Data voi key: {key} chua duoc tao");
+        Debug.Log($"Data voi key: {key} chua duoc tao");
         return null;
     }
 }

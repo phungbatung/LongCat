@@ -35,7 +35,7 @@ public class GameManager : MonoBehaviour
     private bool autoPlay;
     public Action OnWin { get; set; }
     public Action OnLose { get; set; }
-
+    public Action<int> OnLoadLevel { get; set; }
 
     private void Awake()
     {
@@ -68,6 +68,7 @@ public class GameManager : MonoBehaviour
     public void LoadLevel(int level)
     {
         CurrentLevel = level;
+        OnLoadLevel?.Invoke(CurrentLevel);
         Debug.Log($"level{CurrentLevel}");
         string jsonData = Resources.Load<TextAsset>($"level{CurrentLevel}").text;
         Debug.Log("Data: " + jsonData);
@@ -115,7 +116,7 @@ public class GameManager : MonoBehaviour
                 TryMove(directions[directions.Count - 1]);
                 directions.RemoveAt(directions.Count - 1);
                 yield return new WaitUntil(() => GetState() == GameState.WaitingForInput);
-                yield return new WaitForSeconds(0.15f);
+                yield return new WaitForSeconds(0.01f);
             }
             else
             {
