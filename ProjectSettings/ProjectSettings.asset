@@ -13,7 +13,7 @@ PlayerSettings:
   useOnDemandResources: 0
   accelerometerFrequency: 60
   companyName: DefaultCompany
-  productName: LongCat
+  productName: 6_8_LE_LongCat
   defaultCursor: {fileID: 0}
   cursorHotspot: {x: 0, y: 0}
   m_SplashScreenBackgroundColor: {r: 0.13725491, g: 0.12156863, b: 0.1254902, a: 1}
@@ -141,7 +141,8 @@ PlayerSettings:
   visionOSBundleVersion: 1.0
   tvOSBundleVersion: 1.0
   bundleVersion: 0.1.0
-  preloadedAssets: []
+  preloadedAssets:
+  - {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   metroInputSource: 0
   wsaTransparentSwapchain: 0
   m_HolographicPauseOnTrackingLoss: 1
@@ -818,24 +819,24 @@ PlayerSettings:
   webGLCloseOnQuit: 0
   webWasm2023: 0
   scriptingDefineSymbols:
-    Android: DOTWEEN
-    EmbeddedLinux: DOTWEEN
-    GameCoreScarlett: DOTWEEN
-    GameCoreXboxOne: DOTWEEN
-    Kepler: DOTWEEN
-    LinuxHeadlessSimulation: DOTWEEN
-    Nintendo Switch: DOTWEEN
-    PS4: DOTWEEN
-    PS5: DOTWEEN
-    QNX: DOTWEEN
-    ReservedCFE: DOTWEEN
-    Standalone: DOTWEEN
-    VisionOS: DOTWEEN
-    WebGL: DOTWEEN
-    Windows Store Apps: DOTWEEN
-    XboxOne: DOTWEEN
-    iPhone: DOTWEEN
-    tvOS: DOTWEEN
+    Android: DOTWEEN;CT_FB
+    EmbeddedLinux: DOTWEEN;CT_FB
+    GameCoreScarlett: DOTWEEN;CT_FB
+    GameCoreXboxOne: DOTWEEN;CT_FB
+    Kepler: DOTWEEN;CT_FB
+    LinuxHeadlessSimulation: DOTWEEN;CT_FB
+    Nintendo Switch: DOTWEEN;CT_FB
+    PS4: DOTWEEN;CT_FB
+    PS5: DOTWEEN;CT_FB
+    QNX: DOTWEEN;CT_FB
+    ReservedCFE: DOTWEEN;CT_FB
+    Standalone: DOTWEEN;CT_FB
+    VisionOS: DOTWEEN;CT_FB
+    WebGL: DOTWEEN;CT_FB
+    Windows Store Apps: DOTWEEN;CT_FB
+    XboxOne: DOTWEEN;CT_FB
+    iPhone: DOTWEEN;CT_FB
+    tvOS: DOTWEEN;CT_FB
   additionalCompilerArguments: {}
   platformArchitecture: {}
   scriptingBackend:
