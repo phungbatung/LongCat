@@ -97,3 +97,34 @@ InitTestScene*.unity*
 
 # Auto-generated scenes by play mode tests
 /[Aa]ssets/[Ii]nit[Tt]est[Ss]cene*.unity*
+
+# Firebase configuration files (contains sensitive data)
+google-services.json
+google-services.json.meta
+GoogleService-Info.plist
+GoogleService-Info.plist.meta
+
+# Firebase generated files
+/[Aa]ssets/Firebase/
+/[Aa]ssets/Firebase.meta
+/[Aa]ssets/StreamingAssets/google-services-desktop.json
+/[Aa]ssets/StreamingAssets/google-services-desktop.json.meta
+
+# Firebase plugins and dependencies
+/[Aa]ssets/ExternalDependencyManager/
+/[Aa]ssets/ExternalDependencyManager.meta
+/[Aa]ssets/PlayServicesResolver/
+/[Aa]ssets/PlayServicesResolver.meta
+
+# Firebase cache and temp files
+.firebase/
+firebase-debug.log
+firebase-debug.*.log
+ui-debug.log
+database-debug.log
+hosting-debug.log
+functions-debug.log
+
+# Firebase local emulator data
+.firebase/emulators/
+.firebase/hosting.*
