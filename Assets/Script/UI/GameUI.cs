@@ -5,23 +5,37 @@ using UnityEngine.UI;
 
 public class GameUI : MonoBehaviour
 {
+    [Header("Components")]
     [SerializeField] private TextMeshProUGUI levelText;
+    [SerializeField] private LevelSelector levelSelector;
     [SerializeField] private Transform WinPanel;
     [SerializeField] private Transform LosePanel;
+
+    [Header("Effect")]
     [SerializeField] private CaptureEffect captureWinScreenController;
     [SerializeField] private FadeController fadeController;
-
     [SerializeField] private ParticleSystem leftPartical;
     [SerializeField] private ParticleSystem rightPartical;
+
+    [Header("Ads")]
+    [SerializeField] private RewardAds rewardAds;
+    private int loseCount=0;
     private void Start()
     {
         WinPanel.GetComponentInChildren<Button>().onClick.AddListener(()=> 
         {
+            rewardAds.ShowAd();
             fadeController.FadeInOut(ClickBtnNextLevel);
             
         });
         LosePanel.GetComponentInChildren<Button>().onClick.AddListener(() =>
         {
+            loseCount++;
+            if(loseCount>=3)
+            {
+                rewardAds.ShowAd();
+                loseCount = 0;
+            }
             fadeController.FadeInOut(ClickBtnRetry);
         });
         GameManager.Instance.OnWin += OnWinGame;
