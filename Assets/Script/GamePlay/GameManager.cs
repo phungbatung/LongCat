@@ -25,11 +25,16 @@ public class GameManager : MonoBehaviour
     [SerializeField] private int MoveSpeed;
     private LevelHandler levelHandler;
 
-    [SerializeField] private int CurrentLevel;
+    [SerializeField] private int currentLevel;
+    public int ProgessLevel { get; private set; }
 
     private GameState _gameState;
     private Direction _lastMoveDirection;
 
+
+    private Vector2 startTouchPosition;
+    private Vector2 endTouchPosition;
+    private float minSwipeDistance = 100f;
 
 
     private bool autoPlay;
@@ -52,33 +57,34 @@ public class GameManager : MonoBehaviour
         if (data != null)
             LoadLevelEditor(data);
         else
-            LoadLevel(CurrentLevel);
+            LoadLevel(currentLevel);
     }
 
+    #region Load level
     public void ReloadLevel()
     {
-        LoadLevel(CurrentLevel);
+        LoadLevel(currentLevel);
     }
 
     public void LoadNextLevel()
     {
-        LoadLevel(CurrentLevel + 1);
+        LoadLevel(currentLevel + 1);
     }
 
     public void LoadLevel(int level)
     {
-        CurrentLevel = level;
-        OnLoadLevel?.Invoke(CurrentLevel);
-        Debug.Log($"level{CurrentLevel}");
-        string jsonData = Resources.Load<TextAsset>($"level{CurrentLevel}").text;
-        Debug.Log("Data: " + jsonData);
+        currentLevel = level;
+        ProgessLevel = currentLevel > ProgessLevel ? currentLevel : ProgessLevel;
+        OnLoadLevel?.Invoke(currentLevel);
+        string jsonData = Resources.Load<TextAsset>($"level{currentLevel}").text;
         currentData = JsonConvert.DeserializeObject<int[,]>(jsonData);
         levelHandler = new(currentData);
         _lastMoveDirection = Direction.None;
         GenerateMap(levelHandler.Map);
         _gameState = GameState.WaitingForInput;
     }
-
+    #endregion
+    #region Editor
     public void LoadLevelEditor(int[,] data)
     {
         currentData = data;
@@ -96,6 +102,7 @@ public class GameManager : MonoBehaviour
     {
         SceneManager.LoadScene("LevelEditor");
     }
+
     public void AutoPlay()
     {
         var findPath = new FPManager(levelHandler);
@@ -123,7 +130,8 @@ public class GameManager : MonoBehaviour
                 yield return null;
             }
         }
-    }    
+    }
+    #endregion
 
     private void Update()
     {
@@ -132,6 +140,22 @@ public class GameManager : MonoBehaviour
         switch (_gameState)
         {
             case GameState.WaitingForInput:
+                //Input for mobile
+                if (Input.touchCount > 0)
+                {
+                    Touch touch = Input.GetTouch(0);
+
+                    if (touch.phase == TouchPhase.Began)
+                    {
+                        startTouchPosition = touch.position;
+                    }
+                    else if (touch.phase == TouchPhase.Ended)
+                    {
+                        endTouchPosition = touch.position;
+                        DetectSwipe();
+                    }
+                }
+                //Input for PC
                 if (Input.GetKeyDown(KeyCode.UpArrow))
                     TryMove(Direction.Up);
                 else if (Input.GetKeyDown(KeyCode.DownArrow))
@@ -160,6 +184,28 @@ public class GameManager : MonoBehaviour
         }
 
     }
+
+    void DetectSwipe()
+    {
+        Vector2 swipeVector = endTouchPosition - startTouchPosition;
+
+        if (swipeVector.magnitude < minSwipeDistance) return;
+
+        // Chuẩn hóa vector
+        swipeVector.Normalize();
+
+        // Sử dụng góc để xác định hướng
+        float angle = Mathf.Atan2(swipeVector.y, swipeVector.x) * Mathf.Rad2Deg;
+
+        if (angle >= -45 && angle <= 45)
+            TryMove(Direction.Right);
+        else if (angle >= 45 && angle <= 135)
+            TryMove(Direction.Up);
+        else if (angle >= -135 && angle <= -45)
+            TryMove(Direction.Down);
+        else
+            TryMove(Direction.Left);
+    }
     void TryMove(Direction direction)
     {
         Debug.Log($"Try move on direction: {direction}");
@@ -168,6 +214,7 @@ public class GameManager : MonoBehaviour
             StartCoroutine(PlayCatMoveAnimation(direction, levelHandler.MoveInDirection(direction).GetPosition()));
         }
     }
+
     public IEnumerator PlayCatMoveAnimation(Direction direction, Vector3 endPoint)
     {
         Debug.Log($"Move on direction: {direction}, target: {endPoint}");

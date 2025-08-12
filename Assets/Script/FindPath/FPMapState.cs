@@ -44,12 +44,11 @@ public class FPMapState
 
     public bool CanMove(Direction direction)
     {
-        if (direction == Direction.None) return false;
         if (GetNextCellAtDirection(Head, direction, out Cell nextCell))
         {
             //Debug.Log($"Head: (({Head.X}, {Head.Y})");
             //Debug.Log($"Next cell: (({nextCell.X}, {nextCell.Y}), BlockType: {nextCell.BlockType}");
-            if (nextCell.BlockType == CellType.Empty)
+            if (nextCell.BlockType == CellType.Empty || nextCell.BlockType == CellType.StopPoint)
                 return true;
         }
         return false;
@@ -57,7 +56,7 @@ public class FPMapState
 
     public Cell MoveInDirection(Direction direction)
     {
-        preMoveDirection = direction;
+
         Cell nextCell = Head;
         if (GetNextCellAtDirection(nextCell, direction, out Cell _nextCell))
         {
@@ -68,12 +67,20 @@ public class FPMapState
             Debug.LogError($"Check CanMove(direction) is true, but cannot find the next cell at direction: {direction}");
             return null;
         }
-        while (nextCell.BlockType == CellType.Empty)
+        while (CanMove(direction))
         {
             Head.BlockType = CellType.Body;
             Head = nextCell;
-            Head.BlockType = CellType.Head;
-
+            if (Head.BlockType == CellType.StopPoint)
+            {
+                //Neu gap StopPoint thi du'`ng
+                Head.BlockType = CellType.Head;
+                break;
+            }
+            else
+            {
+                Head.BlockType = CellType.Head;
+            }
             if (GetNextCellAtDirection(Head, direction, out _nextCell))
             {
                 nextCell = _nextCell;
@@ -84,7 +91,7 @@ public class FPMapState
             }
 
         }
-        //Debug.Log($"New Head Target: (({Head.X}, {Head.Y})");
+        Debug.Log($"New Head Target: (({Head.X}, {Head.Y})");
         return Head;
     }
 
@@ -128,28 +135,28 @@ public class FPMapState
         {
             for (int column = 0; column < height; column++)
             {
-                if (Map[row, column].BlockType == CellType.Empty)
+                if (Map[row, column].BlockType == CellType.Empty || Map[row, column].BlockType == CellType.StopPoint)
                 {
-                    //Debug.Log($"Check win fail on position: ({row}, {column}");
+                    Debug.Log($"Check win fail on position: ({row}, {column}");
                     return false;
                 }
             }
         }
-        //Debug.Log("Win");
+        Debug.Log("Win");
         return true;
     }
 
     public bool CheckLoseCondition()
     {
-        if (Head.X > 0 && Map[Head.X - 1, Head.Y].BlockType == CellType.Empty) //neu ben trai la empty thi chua thua
+        if (CanMove(Direction.Left)) //neu ben trai la empty thi chua thua
             return false;
-        if (Head.X < Map.GetLength(0) && Map[Head.X + 1, Head.Y].BlockType == CellType.Empty) // phai
+        if (CanMove(Direction.Right)) // phai
             return false;
-        if (Head.Y > 0 && Map[Head.X, Head.Y - 1].BlockType == CellType.Empty) //duoi
+        if (CanMove(Direction.Down)) //duoi
             return false;
-        if (Head.Y < Map.GetLength(1) && Map[Head.X, Head.Y + 1].BlockType == CellType.Empty) //tren
+        if (CanMove(Direction.Up)) //tren
             return false;
-        //Debug.Log("Lose");
+        Debug.Log("Lose");
         return true; // neu ca 4 huong deu khong co empty thi thua
     }
 

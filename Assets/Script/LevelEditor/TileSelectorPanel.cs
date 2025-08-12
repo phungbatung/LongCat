@@ -11,6 +11,7 @@ public class TileSelectorPanel : MonoBehaviour
     public Button Obstacle;
     public Button Head;
     public Button Empty;
+    public Button StopPoint;
     public GameObject sampleTile;
 
     private void Awake()
@@ -18,6 +19,7 @@ public class TileSelectorPanel : MonoBehaviour
         Obstacle.onClick.AddListener(SelectObstacle);
         Head.onClick.AddListener(SelectHead);
         Empty.onClick.AddListener(SelectEmpty);
+        StopPoint.onClick.AddListener(SelectStopPoint);
     }
 
     private void Update()
@@ -38,8 +40,12 @@ public class TileSelectorPanel : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Alpha3))
         {
             SelectEmpty();
-        } 
-        if(Input.GetKeyDown(KeyCode.M))
+        }
+        if (Input.GetKeyDown(KeyCode.Alpha4))
+        {
+            SelectStopPoint();
+        }
+        if (Input.GetKeyDown(KeyCode.M))
         {
             CancelSelected();
         }    
@@ -71,6 +77,14 @@ public class TileSelectorPanel : MonoBehaviour
     public void SelectObstacle()
     {
         _selectedType = CellType.Obstacle;
+        _selected = true;
+        sampleTile.SetActive(true);
+        sampleTile.GetComponent<Image>().color = AssetsManager.Instance.GetColorByKey(_selectedType.ToString());
+    }
+
+    public void SelectStopPoint()
+    {
+        _selectedType = CellType.StopPoint;
         _selected = true;
         sampleTile.SetActive(true);
         sampleTile.GetComponent<Image>().color = AssetsManager.Instance.GetColorByKey(_selectedType.ToString());

@@ -6,14 +6,7 @@ public enum CellType
     Head=1,
     Body=2,
     Obstacle=3,
-    WallLeft=4,
-    WallRight=5,
-    WallBack=6,
-    WallForward=7,
-    WallLeftBack=8,
-    WallLeftForward=9,
-    WallRightBack=10,
-    WallRightForward=11,
+    StopPoint=4
 }
 
 public enum GameState
