@@ -8,17 +8,22 @@ public class Cell
     public int Y;
     public float HorPos;
     public float VerPos;
-    public CellType BlockType;
-
+    public CellType CellType;
+    public ICellHandler CellHandler;
     public Cell(int x, int y,float horPos, float verPos, CellType blockType)
     {
         X = x;
         Y = y;
         HorPos = horPos;
         VerPos = verPos;
-        BlockType = blockType;
+        CellType = blockType;
+        CellHandler = CellControllerFactory.GetCellHandlerByCellType(CellType);
     }   
-
+    public void SetCellType(CellType cellType)
+    {
+        CellType = cellType;
+        CellHandler = CellControllerFactory.GetCellHandlerByCellType(CellType);
+    }
     public Vector3 GetPosition()
     {
         return new Vector3(HorPos, 0.5f, VerPos);
@@ -26,6 +31,6 @@ public class Cell
 
     public Cell Clone()
     {
-        return new Cell(X, Y, HorPos, VerPos, BlockType);
+        return new Cell(X, Y, HorPos, VerPos, CellType);
     }
 }

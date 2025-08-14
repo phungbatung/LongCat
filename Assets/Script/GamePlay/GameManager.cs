@@ -31,7 +31,6 @@ public class GameManager : MonoBehaviour
     private GameState _gameState;
     private Direction _lastMoveDirection;
 
-
     private Vector2 startTouchPosition;
     private Vector2 endTouchPosition;
     private float minSwipeDistance = 100f;
@@ -211,21 +210,73 @@ public class GameManager : MonoBehaviour
         Debug.Log($"Try move on direction: {direction}");
         if (levelHandler.CanMove(direction))
         {
-            StartCoroutine(PlayCatMoveAnimation(direction, levelHandler.MoveInDirection(direction).GetPosition()));
+            StartCoroutine(PlayCatMoveAnimation(direction, levelHandler.MoveInDirection(direction)));
         }
     }
 
-    public IEnumerator PlayCatMoveAnimation(Direction direction, Vector3 endPoint)
+    public IEnumerator PlayCatMoveAnimation(Direction direction, Queue<IMovementHandler> movementQueue)
     {
-        Debug.Log($"Move on direction: {direction}, target: {endPoint}");
 
         SetState(GameState.PlayingAnimation);
-        Vector3 targetPoint = Head.transform.position;
-
-        if (_lastMoveDirection != Direction.None)
+        bool isCorner = true;
+        while (movementQueue.Count > 0)
         {
-            Debug.Log("log");
-            var body = Instantiate(AssetsManager.Instance.GetBlockByType(CellType.Body), targetPoint, Quaternion.identity, Container);
+            IMovementHandler movementHandler = movementQueue.Dequeue();
+            if(_lastMoveDirection != Direction.None && isCorner)
+            {
+                CreateCatBodyCorner(Head.transform.position);
+                isCorner = false;
+            }    
+            else
+            {
+                CreateCatBody(Head.transform.position);
+            }
+            movementHandler.StartMove(Head, MoveSpeed);
+            
+            while(!movementHandler.ReachedTarget)
+            {
+                movementHandler.UpdateMove();
+                yield return null;
+            }  
+        }
+        //cam.Shake(direction);
+        PlayParticleEffect();
+
+        if (levelHandler.CheckWinCondition())
+        {
+            SetState(GameState.Win);
+            OnWin?.Invoke();
+        }
+        else if (levelHandler.CheckLoseCondition())
+        {
+            SetState(GameState.Lose);
+            OnLose?.Invoke();
+        }
+        else
+        {
+            _lastMoveDirection = direction;
+            SetState(GameState.WaitingForInput);
+        }
+
+
+        //
+        void CreateCatBody(Vector3 position)
+        {
+            var body = Instantiate(AssetsManager.Instance.GetBlockByType(CellType.Body), position, Quaternion.identity, Container);
+            if (direction == Direction.Left || direction == Direction.Right)
+            {
+                Instantiate(AssetsManager.Instance.GetBlockByKey($"UpLine"), body.transform).transform.localPosition = new Vector3(0, 0.501f, 0);
+                Instantiate(AssetsManager.Instance.GetBlockByKey($"DownLine"), body.transform).transform.localPosition = new Vector3(0, 0.501f, 0);
+            }
+            if (direction == Direction.Up || direction == Direction.Down)
+            {
+                Instantiate(AssetsManager.Instance.GetBlockByKey($"RightLine"), body.transform).transform.localPosition = new Vector3(0, 0.501f, 0);
+                Instantiate(AssetsManager.Instance.GetBlockByKey($"LeftLine"), body.transform).transform.localPosition = new Vector3(0, 0.501f, 0);
+            }
+        }
+        void CreateCatBodyCorner(Vector3 posotion)
+        {
+            var body = Instantiate(AssetsManager.Instance.GetBlockByType(CellType.Body), posotion, Quaternion.identity, Container);
             if (_lastMoveDirection == Direction.Up)
                 Instantiate(AssetsManager.Instance.GetBlockByKey("UpLine"), body.transform).transform.localPosition = new Vector3(0, 0.501f, 0);
 
@@ -250,94 +301,32 @@ public class GameManager : MonoBehaviour
             if (direction == Direction.Right)
                 Instantiate(AssetsManager.Instance.GetBlockByKey("LeftLine"), body.transform).transform.localPosition = new Vector3(0, 0.501f, 0);
         }
-        else
+        void PlayParticleEffect()
         {
-            CreateCatBody();
-        }
-        targetPoint = Vector3.MoveTowards(targetPoint, endPoint, 1f);
-        while (true)
-        {
-            Head.transform.position = Vector3.MoveTowards(Head.transform.position, targetPoint, MoveSpeed * Time.deltaTime);
-            if (direction == Direction.Left && Head.transform.position.x <= targetPoint.x
-               || direction == Direction.Right && Head.transform.position.x >= targetPoint.x
-               || direction == Direction.Down && Head.transform.position.z <= targetPoint.z
-               || direction == Direction.Up && Head.transform.position.z >= targetPoint.z)
+            particalEffect.transform.parent.position = Head.transform.position;
+            switch (direction)
             {
-
-                if (Mathf.Abs(Vector3.Distance(endPoint, targetPoint)) < 0.01f) // Complete move
-                {
-                    //cam.Shake(direction);
-                    particalEffect.transform.parent.position = Head.transform.position;
-                    switch (direction)
-                    {
-                        case Direction.Left:
-                            particalEffect.transform.parent.forward = Vector3.left;
-                            break;
-                        case Direction.Right:
-                            particalEffect.transform.parent.forward = Vector3.right;
-                            break;
-                        case Direction.Up:
-                            particalEffect.transform.parent.forward = Vector3.forward;
-                            break;
-                        case Direction.Down:
-                            particalEffect.transform.parent.forward = Vector3.back;
-                            break;
-                        case Direction.None:
-                        default:
-                            break;
-                    }
-
-                    particalEffect.Play();
-
-                    if (levelHandler.CheckWinCondition())
-                    {
-                        SetState(GameState.Win);
-                        OnWin?.Invoke();
-                        break;
-                    }
-                    if (levelHandler.CheckLoseCondition())
-                    {
-                        SetState(GameState.Lose);
-                        OnLose?.Invoke();
-                        break;
-                    }
-                    else
-                    {
-                        _lastMoveDirection = direction;
-                        SetState(GameState.WaitingForInput);
-                        break;
-                    }
-                }
-                else
-                {
-                    CreateCatBody();
-                    targetPoint = Vector3.MoveTowards(targetPoint, endPoint, 1f);
-                    Head.transform.position = Vector3.MoveTowards(Head.transform.position, targetPoint, MoveSpeed * Time.deltaTime);
-                }
-
-            }
-            else
-            {
-                Head.transform.position = Vector3.MoveTowards(Head.transform.position, targetPoint, MoveSpeed * Time.deltaTime);
+                case Direction.Left:
+                    particalEffect.transform.parent.forward = Vector3.left;
+                    break;
+                case Direction.Right:
+                    particalEffect.transform.parent.forward = Vector3.right;
+                    break;
+                case Direction.Up:
+                    particalEffect.transform.parent.forward = Vector3.forward;
+                    break;
+                case Direction.Down:
+                    particalEffect.transform.parent.forward = Vector3.back;
+                    break;
+                case Direction.None:
+                default:
+                    break;
             }
 
-            yield return null;
-        }
-        void CreateCatBody()
-        {
-            var body = Instantiate(AssetsManager.Instance.GetBlockByType(CellType.Body), targetPoint, Quaternion.identity, Container);
-            if (direction == Direction.Left || direction == Direction.Right)
-            {
-                Instantiate(AssetsManager.Instance.GetBlockByKey($"UpLine"), body.transform).transform.localPosition = new Vector3(0, 0.501f, 0);
-                Instantiate(AssetsManager.Instance.GetBlockByKey($"DownLine"), body.transform).transform.localPosition = new Vector3(0, 0.501f, 0);
-            }
-            if (direction == Direction.Up || direction == Direction.Down)
-            {
-                Instantiate(AssetsManager.Instance.GetBlockByKey($"RightLine"), body.transform).transform.localPosition = new Vector3(0, 0.501f, 0);
-                Instantiate(AssetsManager.Instance.GetBlockByKey($"LeftLine"), body.transform).transform.localPosition = new Vector3(0, 0.501f, 0);
-            }
+            particalEffect.Play();
         }
     }
+
 
     public GameState GetState() => _gameState;
 
@@ -366,11 +355,11 @@ public class GameManager : MonoBehaviour
 
     public void CreateBlock(Cell cell)
     {
-        if (cell.BlockType != CellType.Empty)
+        if (cell.CellType != CellType.Empty)
         {
-            var block = Instantiate(AssetsManager.Instance.GetBlockByType(cell.BlockType), Container);
+            var block = Instantiate(AssetsManager.Instance.GetBlockByType(cell.CellType), Container);
             block.transform.position = cell.GetPosition();
-            if (cell.BlockType == CellType.Head)
+            if (cell.CellType == CellType.Head)
                 Head = block.transform;
         }
     }

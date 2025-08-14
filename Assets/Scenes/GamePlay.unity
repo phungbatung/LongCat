@@ -3211,7 +3211,7 @@ GameObject:
   - component: {fileID: 991774373}
   - component: {fileID: 991774372}
   m_Layer: 5
-  m_Name: Button
+  m_Name: BackBtn
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -8853,10 +8853,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 915311a773067ad4fb1bbf97bbd1002e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  pause: {fileID: 0}
-  resume: {fileID: 0}
-  restart: {fileID: 0}
-  menu: {fileID: 0}
+  pause: {fileID: 1112723560}
+  resume: {fileID: 1325374849}
+  restart: {fileID: 427215832}
+  menu: {fileID: 193561836}
+  buttonContainer: {fileID: 1643693838}
 --- !u!1 &1262289030
 GameObject:
   m_ObjectHideFlags: 0
@@ -9792,7 +9793,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'Level
+  m_text: '
 
 '
   m_isRightToLeft: 0

@@ -7,7 +7,7 @@ public class LevelHandler
     
     public Cell[,] Map { get; private set; }
 
-    public Cell Head { get; private set; }
+    public Cell Head { get; set; }
 
     public LevelHandler(int[,] mapData)
     {
@@ -27,8 +27,9 @@ public class LevelHandler
             for (int column = 0; column < height; column++)
             {
                 var cell = new Cell(row, column, column + offSetX, offSetY - row, (CellType)mapData[row, column]);
+                cell.CellHandler.Setup(this, cell);
                 Map[row, column] = cell;
-                if(cell.BlockType == CellType.Head)
+                if(cell.CellType == CellType.Head)
                 {
                     Head = cell;
                 }
@@ -40,53 +41,37 @@ public class LevelHandler
     {
         if (GetNextCellAtDirection(Head, direction, out Cell nextCell))
         {
-            //Debug.Log($"Head: (({Head.X}, {Head.Y})");
-            //Debug.Log($"Next cell: (({nextCell.X}, {nextCell.Y}), BlockType: {nextCell.BlockType}");
-            if(nextCell.BlockType == CellType.Empty || nextCell.BlockType == CellType.StopPoint)
-                return true;
+            return nextCell.CellHandler.CanMove();
         }
         return false;
     }
 
-    public Cell MoveInDirection(Direction direction)
+    public Queue<IMovementHandler> MoveInDirection(Direction direction)
     {
+        Queue<IMovementHandler> movementQueue = new Queue<IMovementHandler>();
 
-        Cell nextCell = Head;
-        if(GetNextCellAtDirection(nextCell, direction, out Cell _nextCell))
-        {
-            nextCell = _nextCell;
-        }
-        else
-        {
-            Debug.LogError($"Check CanMove(direction) is true, but cannot find the next cell at direction: {direction}");
-            return null;
-        }
+        List<IMovementHandler> movementHandlerList;
         while (CanMove(direction))
         {
-            Head.BlockType = CellType.Body;
-            Head = nextCell;
-            if (Head.BlockType == CellType.StopPoint)
+            bool canMoveNext = true;
+            if (GetNextCellAtDirection(Head, direction, out Cell nextCell))
             {
-                //Neu gap StopPoint thi du'`ng
-                Head.BlockType = CellType.Head;
-                break;
-            }
-            else
-            {
-                Head.BlockType = CellType.Head;
-            }
-            if(GetNextCellAtDirection(Head, direction, out _nextCell))
-            {
-                nextCell = _nextCell;
-            }
-            else
-            {
-                break;
+                movementHandlerList = nextCell.CellHandler.GetMovementHandlers();
+                foreach (var movementHandler in movementHandlerList)
+                {
+                    movementQueue.Enqueue(movementHandler);
+                    canMoveNext = movementHandler.DestinationCell.CellHandler.CanMoveNext();
+                    Head.SetCellType(CellType.Body);
+                    Head = movementHandler.DestinationCell;
+                    Head.SetCellType(CellType.Head);
+                }
+                if (!canMoveNext)
+                    break;
             }
             
-        }
-        Debug.Log($"New Head Target: (({Head.X}, {Head.Y})");
-        return Head;
+        }    
+
+        return movementQueue;
     }
 
     public bool GetNextCellAtDirection(Cell currentCell, Direction direction, out Cell nextCell)
@@ -129,7 +114,7 @@ public class LevelHandler
         {
             for (int column = 0; column < height; column++)
             {
-                if (Map[row, column].BlockType == CellType.Empty || Map[row, column].BlockType == CellType.StopPoint)
+                if (Map[row, column].CellType == CellType.Empty || Map[row, column].CellType == CellType.StopPoint)
                 {
                     Debug.Log($"Check win fail on position: ({row}, {column}");
                     return false;
