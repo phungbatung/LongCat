@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using UnityEngine;
-using static UnityEngine.Rendering.DebugUI.Table;
 
 public class LevelHandler
 { 
@@ -12,6 +11,20 @@ public class LevelHandler
     public LevelHandler(int[,] mapData)
     {
         LoadData(mapData);
+    }
+    public LevelHandler(LevelHandler levelHandler)
+    {
+        Map = new Cell[levelHandler.Map.GetLength(0), levelHandler.Map.GetLength(1)];
+        for (int row = 0; row < levelHandler.Map.GetLength(0); row++)
+        {
+            for (int column = 0; column < levelHandler.Map.GetLength(1); column++)
+            {
+                Map[row, column] = levelHandler.Map[row, column].Clone();
+                Map[row, column].CellHandler.Setup(this, Map[row, column]);
+                if (Map[row, column].CellType == CellType.Head)
+                    Head = Map[row, column];
+            }
+        }
     }
 
     public void LoadData(int[,] mapData)
@@ -137,5 +150,10 @@ public class LevelHandler
             return false;
         Debug.Log("Lose");
         return true; // neu ca 4 huong deu khong co empty thi thua
+    }
+
+    public LevelHandler Clone()
+    {
+        return new LevelHandler(this);
     }
 }

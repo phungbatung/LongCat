@@ -7,7 +7,7 @@ public class FPManager
     public Stack<FPMapState> stateStack = new Stack<FPMapState>();
     public FPManager(LevelHandler levelHanler)
     {
-        stateStack.Push(new FPMapState(levelHanler.Map, levelHanler.Head));
+        stateStack.Push(new FPMapState(levelHanler));
     }
 
     public List<Direction> CalculateFinalPath()
@@ -17,7 +17,7 @@ public class FPManager
         while (stateStack.Count > 0)
         {
             FPMapState currentState = stateStack.Pop();
-            if (currentState.CheckWinCondition())
+            if (currentState.LevelHandler.CheckWinCondition())
             {
                 while(currentState.preMoveDirection != Direction.None)
                 {
@@ -27,17 +27,18 @@ public class FPManager
                 //Debug.LogError("Đã tìm ra cách để chiến thắng màn chơi này!!!");
                 return result;
             }    
-            if (currentState.CheckLoseCondition())
+            if (currentState.LevelHandler.CheckLoseCondition())
             {
                 continue;
             }
 
             foreach (Direction dir in Enum.GetValues(typeof(Direction)))
             {
-                if (currentState.CanMove(dir))
+                if (currentState.LevelHandler.CanMove(dir))
                 {
                     FPMapState newState = currentState.Clone();
-                    newState.MoveInDirection(dir);
+                    newState.preMoveDirection = dir;
+                    newState.LevelHandler.MoveInDirection(dir);
                     stateStack.Push(newState);
                 }    
             }
